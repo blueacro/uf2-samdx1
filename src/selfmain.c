@@ -88,6 +88,10 @@ void set_fuses_and_bootprot(uint32_t new_bootprot) {
     logval("current_bootprot", current_bootprot);
     logval("new_bootprot", new_bootprot);
 
+#ifdef NO_BOOT_PROT
+    return;
+#endif
+
     // Don't write if nothing will be changed.
     if (current_bootprot == new_bootprot && !repair_fuses) {
         return;

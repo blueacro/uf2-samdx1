@@ -10,8 +10,11 @@
 #define USB_VID 0x239A
 #define USB_PID 0x00CD
 
-#define LED_PIN PIN_PB10
+#define LED_PIN PIN_PB11
+#define BUTTON_BOOT_PIN PIN_PB23
+#define LED_PIN_BOOT PIN_PB12
 
+#define NO_BOOT_PROT 1
 
 #define BOOT_USART_MODULE                 SERCOM4
 #define BOOT_USART_MASK                   APBDMASK

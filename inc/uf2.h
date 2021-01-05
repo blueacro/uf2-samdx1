@@ -267,6 +267,7 @@ void system_init(void);
 #define LED_TICK led_tick
 
 #define PINOP(pin, OP) (PORT->Group[(pin) / 32].OP.reg = (1 << ((pin) % 32)))
+#define PIN_READ(pin) (PORT->Group[(pin) / 32].IN.reg & (1 << ((pin) % 32)))
 
 void led_tick(void);
 void led_signal(void);
@@ -326,6 +327,8 @@ void timerTick(void);
 void delay(uint32_t ms);
 void hidHandoverLoop(int ep);
 void handoverPrep(void);
+
+bool buttonCheck(void);
 
 // Useful for debugging.
 #ifdef BLINK_DEBUG

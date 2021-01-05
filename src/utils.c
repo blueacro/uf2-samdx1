@@ -3,6 +3,7 @@
 
 static uint32_t timerLow;
 uint32_t timerHigh, resetHorizon;
+bool buttonHeld;
 
 void __attribute__ ((noinline)) delay(uint32_t ms) {
     // These multipliers were determined empirically and are only approximate.
@@ -45,6 +46,24 @@ void blink_n_forever(uint32_t pin, uint32_t n, uint32_t interval) {
     }
 }
 #endif
+
+bool buttonCheck(void) {
+    PINOP(BUTTON_BOOT_PIN, DIRCLR);
+    PINOP(BUTTON_BOOT_PIN, OUTSET); /* Enable pullup */
+    for (volatile int i = 0; i < 100; i++) {
+        __DMB();
+    }
+    uint32_t value = PIN_READ(BUTTON_BOOT_PIN);
+    PINOP(LED_PIN_BOOT, DIRSET);
+    if (value == 0) {
+        PINOP(LED_PIN_BOOT, OUTSET);
+        buttonHeld = true;
+        return true;
+    }
+    PINOP(LED_PIN_BOOT, OUTCLR);
+    buttonHeld = false;
+    return false;
+}
 
 void timerTick(void) {
     if (timerLow-- == 0) {

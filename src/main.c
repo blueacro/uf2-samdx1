@@ -91,6 +91,11 @@ extern int8_t led_tick_step;
 static void check_start_application(void) {
     uint32_t app_start_address;
 
+    /* Check button settings to see if we should stay in the bootloader */
+    if (buttonCheck()) {
+        return;
+    }
+
     /* Load the Reset Handler address of the application */
     app_start_address = *(uint32_t *)(APP_START_ADDRESS + 4);
 
@@ -102,6 +107,7 @@ static void check_start_application(void) {
         /* Stay in bootloader */
         return;
     }
+
 
 #if USE_SINGLE_RESET
     if (SINGLE_RESET()) {
@@ -161,6 +167,7 @@ int main(void) {
         while (1) {
         }
 
+#ifndef NO_BOOT_PROD
 #if defined(SAMD21)
     // If fuses have been reset to all ones, the watchdog ALWAYS-ON is
     // set, so we can't turn off the watchdog.  Set the fuse to a
@@ -232,6 +239,7 @@ int main(void) {
     while (!SUPC->STATUS.bit.B33SRDY) {}  // Wait for BOD33 to synchronize.
     SUPC->BOD33.bit.ACTION = SUPC_BOD33_ACTION_RESET_Val;
     SUPC->BOD33.bit.ENABLE = 1;
+#endif
 #endif
 
 #if USB_VID == 0x239a && USB_PID == 0x0013     // Adafruit Metro M0
