@@ -3,15 +3,15 @@
 
 static uint32_t timerLow;
 uint32_t timerHigh, resetHorizon;
-bool buttonHeld;
+volatile bool buttonHeld;
 
-void __attribute__ ((noinline)) delay(uint32_t ms) {
+void __attribute__((noinline)) delay(uint32_t ms) {
     // These multipliers were determined empirically and are only approximate.
     // After the pulsing LED is enabled (led_tick_on), the multipliers need to change
     // due to the interrupt overhead of the pulsing.
     // SAMD21 starts up at 1MHz by default.
 #ifdef SAMD21
-    uint32_t count = ms * (current_cpu_frequency_MHz) * (led_tick_on ? 149: 167);
+    uint32_t count = ms * (current_cpu_frequency_MHz) * (led_tick_on ? 149 : 167);
 #endif
 #ifdef SAMD51
     // SAMD51 starts up at 48MHz by default, and we set the clock to
@@ -40,29 +40,40 @@ void blink_n(uint32_t pin, uint32_t n, uint32_t interval) {
 }
 
 void blink_n_forever(uint32_t pin, uint32_t n, uint32_t interval) {
-    while(1) {
+    while (1) {
         blink_n(pin, n, interval);
-        delay(interval*5);
+        delay(interval * 5);
     }
 }
 #endif
 
 bool buttonCheck(void) {
+    PINOP(LED_PIN_BOOT2, DIRSET);
+    PINOP(LED_PIN_BOOT, DIRSET);
+
     PINOP(BUTTON_BOOT_PIN, DIRCLR);
     PINOP(BUTTON_BOOT_PIN, OUTSET); /* Enable pullup */
-    for (volatile int i = 0; i < 100; i++) {
-        __DMB();
-    }
+    PIN_PULLUP(BUTTON_BOOT_PIN);
+    PIN_INPUT(BUTTON_BOOT_PIN);
+
+    delay(300);
     uint32_t value = PIN_READ(BUTTON_BOOT_PIN);
-    PINOP(LED_PIN_BOOT, DIRSET);
+    if (value == 0) {
+        PINOP(LED_PIN_BOOT2, OUTSET);
+    }
+    delay(1000);
+    value = PIN_READ(BUTTON_BOOT_PIN);
     if (value == 0) {
         PINOP(LED_PIN_BOOT, OUTSET);
         buttonHeld = true;
-        return true;
+    } else {
+        PINOP(LED_PIN_BOOT, OUTCLR);
+        buttonHeld = false;
     }
+    delay(1000);
+    PINOP(LED_PIN_BOOT2, OUTCLR);
     PINOP(LED_PIN_BOOT, OUTCLR);
-    buttonHeld = false;
-    return false;
+    return buttonHeld;
 }
 
 void timerTick(void) {

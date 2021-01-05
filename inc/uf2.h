@@ -70,7 +70,7 @@
 // will start the app. This only happens if the app says it wants that (see SINGLE_RESET() below).
 // If disabled here or by the app, the bootloader will only start with double-click of the reset
 // button.
-#define USE_SINGLE_RESET 1
+#define USE_SINGLE_RESET 0
 
 // Fine-tuning of features
 #define USE_HID_SERIAL 0   // just an example, not really needed; 36 bytes
@@ -268,6 +268,8 @@ void system_init(void);
 
 #define PINOP(pin, OP) (PORT->Group[(pin) / 32].OP.reg = (1 << ((pin) % 32)))
 #define PIN_READ(pin) (PORT->Group[(pin) / 32].IN.reg & (1 << ((pin) % 32)))
+#define PIN_PULLUP(pin) (PORT->Group[(pin) / 32].PINCFG[pin % 32].bit.PULLEN = 1)
+#define PIN_INPUT(pin) (PORT->Group[(pin) / 32].PINCFG[pin%32].bit.INEN = 1)
 
 void led_tick(void);
 void led_signal(void);
